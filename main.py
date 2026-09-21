@@ -15,6 +15,7 @@ st.set_page_config(page_title="영화 데이터 그래프 도감 1 - 시간", pa
 INSIGHTS = {
     "graph1": "",  # 예: "개봉 직후 관객이 가장 많고, 이후 서서히 줄어든다."
     "graph2": "",
+    "graph3": "",
 }
 
 
@@ -111,9 +112,51 @@ st.plotly_chart(fig2, use_container_width=True)
 show_insight("graph2")
 
 # ═════════════════════════════════════════════
-# 구역 3. (다음 그래프가 들어갈 자리)
+# 구역 3. 날짜별 10위권 일관객 합계
+# ═════════════════════════════════════════════
+st.divider()
+st.header("3. 날짜별 10위권 일관객 합계")
+
+daily_total = df.groupby("날짜", as_index=False)["일관객"].sum()
+top3_days = daily_total.nlargest(3, "일관객").sort_values("날짜")
+
+fig3 = px.area(
+    daily_total,
+    x="날짜",
+    y="일관객",
+    color_discrete_sequence=[WARM_COLOR],
+)
+fig3.update_traces(
+    hovertemplate="%{x|%Y-%m-%d}<br>10위권 합계 %{y:,}명<extra></extra>"
+)
+
+# 합계가 가장 컸던 3일: 점으로 표시하고 날짜를 적기
+fig3.add_scatter(
+    x=top3_days["날짜"],
+    y=top3_days["일관객"],
+    mode="markers+text",
+    text=top3_days["날짜"].dt.strftime("%Y-%m-%d"),
+    textposition="top center",
+    marker=dict(size=11, color="#A8201A", line=dict(width=2, color="white")),
+    showlegend=False,
+    hovertemplate="%{x|%Y-%m-%d}<br>10위권 합계 %{y:,}명<extra></extra>",
+)
+
+fig3.update_layout(
+    xaxis_title="날짜",
+    yaxis_title="10위권 일관객 합계(명)",
+    yaxis_tickformat=",",
+    margin=dict(l=10, r=10, t=40, b=10),
+)
+# 맨 위 날짜 글자가 잘리지 않도록 y축 위쪽에 여유를 둠
+fig3.update_yaxes(range=[0, daily_total["일관객"].max() * 1.15])
+st.plotly_chart(fig3, use_container_width=True)
+show_insight("graph3")
+
+# ═════════════════════════════════════════════
+# 구역 4. (다음 그래프가 들어갈 자리)
 # ═════════════════════════════════════════════
 # st.divider()
-# st.header("3. 제목")
+# st.header("4. 제목")
 # ... 그래프 코드 ...
-# show_insight("graph3")
+# show_insight("graph4")
