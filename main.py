@@ -16,6 +16,7 @@ INSIGHTS = {
     "graph1": "",  # 예: "개봉 직후 관객이 가장 많고, 이후 서서히 줄어든다."
     "graph2": "",
     "graph3": "",
+    "graph4": "",
 }
 
 
@@ -154,9 +155,47 @@ st.plotly_chart(fig3, use_container_width=True)
 show_insight("graph3")
 
 # ═════════════════════════════════════════════
-# 구역 4. (다음 그래프가 들어갈 자리)
+# 구역 4. 기간 내 관객 합계 TOP 10 영화
+# ═════════════════════════════════════════════
+st.divider()
+st.header("4. 관객 합계 TOP 10 영화")
+
+movie_summary = (
+    df.groupby("영화명")
+    .agg(관객합계=("일관객", "sum"), 순위권날수=("날짜", "nunique"))
+    .reset_index()
+)
+top10 = movie_summary.nlargest(10, "관객합계")  # 관객 많은 순(내림차순)
+
+fig4 = px.bar(
+    top10,
+    x="관객합계",
+    y="영화명",
+    orientation="h",
+    custom_data=["순위권날수"],
+    color_discrete_sequence=[WARM_COLOR],
+)
+fig4.update_traces(
+    hovertemplate=(
+        "<b>%{y}</b><br>"
+        "일관객 합계 %{x:,}명<br>"
+        "10위권에 든 날수 %{customdata[0]}일<extra></extra>"
+    )
+)
+fig4.update_layout(
+    xaxis_title="일관객 합계(명)",
+    yaxis_title="",
+    xaxis_tickformat=",",
+    yaxis=dict(categoryorder="array", categoryarray=top10["영화명"].tolist(), autorange="reversed"),  # 1위가 맨 위
+    margin=dict(l=10, r=10, t=30, b=10),
+)
+st.plotly_chart(fig4, use_container_width=True)
+show_insight("graph4")
+
+# ═════════════════════════════════════════════
+# 구역 5. (다음 그래프가 들어갈 자리)
 # ═════════════════════════════════════════════
 # st.divider()
-# st.header("4. 제목")
+# st.header("5. 제목")
 # ... 그래프 코드 ...
-# show_insight("graph4")
+# show_insight("graph5")
