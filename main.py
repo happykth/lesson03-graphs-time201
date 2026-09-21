@@ -17,6 +17,7 @@ INSIGHTS = {
     "graph2": "",
     "graph3": "",
     "graph4": "",
+    "graph5": "",
 }
 
 
@@ -193,9 +194,44 @@ st.plotly_chart(fig4, use_container_width=True)
 show_insight("graph4")
 
 # ═════════════════════════════════════════════
-# 구역 5. (다음 그래프가 들어갈 자리)
+# 구역 5. 월 × 요일별 일관객 합계 히트맵
+# ═════════════════════════════════════════════
+st.divider()
+st.header("5. 월 × 요일별 일관객 합계")
+
+WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"]  # 월요일부터 일요일 순서
+
+heat_df = df.copy()
+# 1년치 데이터가 두 해에 걸칠 수 있어서, 같은 달이 섞이지 않게 '연-월'로 묶음
+heat_df["월"] = heat_df["날짜"].dt.strftime("%Y-%m")
+heat_df["요일"] = heat_df["날짜"].dt.dayofweek.map(lambda i: WEEKDAYS[i])
+
+heat = (
+    heat_df.pivot_table(index="요일", columns="월", values="일관객", aggfunc="sum", fill_value=0)
+    .reindex(WEEKDAYS)  # 행 순서: 월 → 일
+)
+
+fig5 = px.imshow(
+    heat,
+    color_continuous_scale="OrRd",  # 진할수록 관객 많음
+    aspect="auto",
+)
+fig5.update_traces(
+    hovertemplate="%{x} %{y}요일<br>일관객 합계 %{z:,}명<extra></extra>"
+)
+fig5.update_layout(
+    xaxis_title="월",
+    yaxis_title="요일",
+    coloraxis_colorbar=dict(title="일관객 합계(명)", tickformat=","),
+    margin=dict(l=10, r=10, t=30, b=10),
+)
+st.plotly_chart(fig5, use_container_width=True)
+show_insight("graph5")
+
+# ═════════════════════════════════════════════
+# 구역 6. (다음 그래프가 들어갈 자리)
 # ═════════════════════════════════════════════
 # st.divider()
-# st.header("5. 제목")
+# st.header("6. 제목")
 # ... 그래프 코드 ...
-# show_insight("graph5")
+# show_insight("graph6")
