@@ -14,6 +14,7 @@ st.set_page_config(page_title="영화 데이터 그래프 도감 1 - 시간", pa
 # 새 그래프를 추가하면 여기에 키를 하나 더 만들고 문장을 적으면 됩니다.
 INSIGHTS = {
     "graph1": "",  # 예: "개봉 직후 관객이 가장 많고, 이후 서서히 줄어든다."
+    "graph2": "",
 }
 
 
@@ -79,9 +80,40 @@ st.plotly_chart(fig1, use_container_width=True)
 show_insight("graph1")
 
 # ═════════════════════════════════════════════
-# 구역 2. (다음 그래프가 들어갈 자리)
+# 구역 2. 관객 합계 TOP 5 영화 비교
+# ═════════════════════════════════════════════
+st.divider()
+st.header("2. 관객 합계 TOP 5 영화의 날짜별 관객 비교")
+st.caption("범례의 영화 이름을 누르면 그 선을 켜고 끌 수 있어요.")
+
+top5 = movie_order[:5]  # 기간 내 일관객 합계가 큰 순서
+top5_df = df[df["영화명"].isin(top5)].sort_values(["영화명", "날짜"])
+
+fig2 = px.line(
+    top5_df,
+    x="날짜",
+    y="일관객",
+    color="영화명",
+    category_orders={"영화명": top5},  # 범례를 합계 순서대로
+    color_discrete_sequence=["#E4572E", "#F3A712", "#A8201A", "#6B8F71", "#8C5E58"],
+)
+fig2.update_traces(
+    hovertemplate="%{x|%Y-%m-%d}<br>일관객 %{y:,}명<extra>%{fullData.name}</extra>"
+)
+fig2.update_layout(
+    xaxis_title="날짜",
+    yaxis_title="일관객(명)",
+    yaxis_tickformat=",",
+    legend_title_text="영화 (클릭해서 켜고 끄기)",
+    margin=dict(l=10, r=10, t=30, b=10),
+)
+st.plotly_chart(fig2, use_container_width=True)
+show_insight("graph2")
+
+# ═════════════════════════════════════════════
+# 구역 3. (다음 그래프가 들어갈 자리)
 # ═════════════════════════════════════════════
 # st.divider()
-# st.header("2. 제목")
+# st.header("3. 제목")
 # ... 그래프 코드 ...
-# show_insight("graph2")
+# show_insight("graph3")
